@@ -133,3 +133,53 @@
         name: ''
         state: absent
         host_all: true
+
+    - name: "Create WordPress DB {{ mysql_DB }}"
+      mysql_db: 
+        login_user: "root"
+        login_password: "{{ mysql_root_pw }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "{{ mysql_DB }}"
+        state: present
+    - name: "Create WordPress User {{ mysql_user }}"
+      mysql_user: 
+        login_user: "root"
+        login_password: "{{ mysql_root_pw }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "{{ mysql_user }}"
+        host: "%"
+        password: "{{ mysql_pw }}"
+        priv: "{{ mysql_DB }}.*:ALL"
+
+    - name: "Download WordPress latest to /tmp/wordpress.tar.gz"
+      get_url:
+        url: "{{ wp_url }}"
+        dest: /tmp/wordpress.tar.gz
+    
+    - name: "Extract WordPress contents"
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /tmp/
+        remote_src: true
+      
+    - name: "Place WordPress Site Files to Document root /var/www/{{ domain }}"
+      copy:
+        src: /tmp/wordpress/
+        dest: "/var/www/{{ domain }}"
+        remote_src: true
+        owner: "{{ user }}"
+        group: "{{ user }}"
+
+    - name: "WordPress configure wp-congig.php"
+      template:
+        src: wp-config.php.j2
+        dest: "/var/www/{{ domain }}/wp-config.php"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+    
+    - name: "Override default PHP values in .user.ini for {{ domain }}"
+      copy:
+        src: .user.ini
+        dest: "/var/www/{{ domain }}/.user.ini"
+        owner: "{{ user }}"
+        group: "{{ user }}"
