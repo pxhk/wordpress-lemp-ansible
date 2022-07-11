@@ -1,0 +1,11 @@
+---
+- name: "Docker setup"
+  hosts: amazon
+  become: true
+  vars_files: 
+    - docker.var
+    - secret
+  vars: 
+    git_url: "https://github.com/pxhk/devops-flask.git"
+    git_clonedir: "/var/git-content/"
+  tasks:
