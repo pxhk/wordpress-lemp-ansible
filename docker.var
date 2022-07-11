@@ -1,7 +1,0 @@
----
-package:
-  - docker
-  - python-pip
-  - git
-service: "docker"
-user: "ec2-user"
